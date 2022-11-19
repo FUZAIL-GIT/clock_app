@@ -1,5 +1,4 @@
 // ignore_for_file: deprecated_member_use
-
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:clock_app/utils/logger.dart';
 import 'package:clock_app/view/screens/home_view.dart';
@@ -10,7 +9,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-
 import 'utils/app_lifcycle.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNitificationPlugin =
