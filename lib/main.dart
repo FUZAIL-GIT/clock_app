@@ -11,6 +11,8 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
+import 'utils/app_lifcycle.dart';
+
 final FlutterLocalNotificationsPlugin flutterLocalNitificationPlugin =
     FlutterLocalNotificationsPlugin();
 
@@ -19,6 +21,7 @@ void main() async {
   // ensures the binding is available and ready before
   // any native call
   WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding.instance.addObserver(LifeCycleListener());
   await AndroidAlarmManager.initialize();
   tz.initializeTimeZones();
   //initial GetStorage bucket
@@ -27,7 +30,7 @@ void main() async {
   GetStorage().writeIfNull('hourFormat', 'hh');
   talker.info('App is started');
   runApp(DevicePreview(
-    enabled: false,
+    enabled: true,
     builder: (context) => ScreenUtilInit(
         designSize: const Size(360, 690),
         builder: (context, child) {

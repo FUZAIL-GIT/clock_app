@@ -107,30 +107,24 @@ class AlarmView extends GetView<AlarmController> {
 
   Widget alarmCard(
       List<AlarmInfo>? alarmInfo, int index, AlarmController alarmController) {
-    String noOfDays() {
-      List<int> daysName = [
-        alarmInfo![index].isMon,
-        alarmInfo[index].isTue,
-        alarmInfo[index].isWed,
-        alarmInfo[index].isThu,
-        alarmInfo[index].isFri,
-        alarmInfo[index].isSat,
-        alarmInfo[index].isSun,
+    List<String> listOfDays() {
+      List daysName = [
+        {"dayNum": alarmInfo![index].isOnce, "dayName": "Once"},
+        {"dayNum": alarmInfo[index].isMon, "dayName": "Mon"},
+        {"dayNum": alarmInfo[index].isTue, "dayName": "Tue"},
+        {"dayNum": alarmInfo[index].isWed, "dayName": "Wed"},
+        {"dayNum": alarmInfo[index].isThu, "dayName": "Thu"},
+        {"dayNum": alarmInfo[index].isFri, "dayName": "Fri"},
+        {"dayNum": alarmInfo[index].isSat, "dayName": "Sat"},
+        {"dayNum": alarmInfo[index].isSun, "dayName": "Sun"},
       ];
-      if (alarmInfo[index].isMon == 1 &&
-          alarmInfo[index].isTue == 1 &&
-          alarmInfo[index].isWed == 1 &&
-          alarmInfo[index].isThu == 1 &&
-          alarmInfo[index].isFri == 1 &&
-          alarmInfo[index].isFri == 1 &&
-          alarmInfo[index].isSat == 1 &&
-          alarmInfo[index].isSun == 1) {
-        talker.log("Daily");
-        return 'Daily';
-      } else if (alarmInfo[index].isOnce == 1) {
-        return "Once";
+      List<String> daysList = [];
+      for (var i = 0; i <= 7; i++) {
+        if (daysName[i]["dayNum"] == 1) {
+          daysList.add(daysName[i]["dayName"]);
+        }
       }
-      return 'as';
+      return daysList;
     }
 
     return GestureDetector(
@@ -210,16 +204,50 @@ class AlarmView extends GetView<AlarmController> {
                   })
                 ],
               ),
-              Text(
-                noOfDays(),
-                style: TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'Orbitron',
-                  fontWeight: FontWeight.normal,
-                  letterSpacing: 0.7,
-                  fontSize: 15.sp,
-                ),
+              SizedBox(
+                height: 20,
+                child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: listOfDays().length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: EdgeInsets.only(right: 5.w),
+                        child: Row(
+                          children: [
+                            Text(
+                              listOfDays()[index],
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'Orbitron',
+                                fontWeight: FontWeight.normal,
+                                letterSpacing: 0.7,
+                                fontSize: 12.sp,
+                              ),
+                            ),
+                            Text(
+                              index != listOfDays().length - 1 ? "," : '',
+                              style: TextStyle(
+                                color: const Color(0xff65D1BA),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15.sp,
+                              ),
+                            )
+                          ],
+                        ),
+                      );
+                    }),
               ),
+
+              // Text(
+              //   noOfDays(),
+              //   style: TextStyle(
+              //     color: Colors.white,
+              //     fontFamily: 'Orbitron',
+              //     fontWeight: FontWeight.normal,
+              //     letterSpacing: 0.7,
+              //     fontSize: 15.sp,
+              //   ),
+              // ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
