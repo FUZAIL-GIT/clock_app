@@ -1,6 +1,5 @@
 // ignore_for_file: unnecessary_null_comparison
 
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -9,7 +8,6 @@ import 'package:intl/intl.dart';
 
 import '../../controller/alarm_controller.dart';
 import 'home_view.dart';
-
 
 class AlarmPostView extends GetView {
   const AlarmPostView({Key? key}) : super(key: key);
@@ -35,7 +33,7 @@ class AlarmPostView extends GetView {
       );
     }
     return Form(
-      key: alarmController.forkKey,
+      key: alarmController.formkKey,
       child: Scaffold(
           resizeToAvoidBottomInset: false,
           backgroundColor: Colors.grey.shade900,
@@ -60,7 +58,7 @@ class AlarmPostView extends GetView {
             actions: [
               TextButton(
                 onPressed: () async {
-                  if (alarmController.forkKey.currentState!.validate()) {
+                  if (alarmController.formkKey.currentState!.validate()) {
                     var result = args == null
                         ? alarmController.submitData()
                         : alarmController.updateData(

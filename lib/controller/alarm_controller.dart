@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
+import 'package:clock_app/utils/local_notification.dart';
 import 'package:day_night_time_picker/lib/daynight_timepicker.dart';
 import 'package:disable_battery_optimization/disable_battery_optimization.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +17,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:timezone/timezone.dart' as tz;
+
 import '../../../../main.dart';
 import '../model/alarm_model.dart';
 import '../utils/globals.dart';
@@ -25,7 +26,7 @@ import '../utils/logger.dart';
 import '../view/screens/alarmdetails_view.dart';
 
 class AlarmController extends GetxController with StateMixin<List<AlarmInfo>> {
-  final forkKey = GlobalKey<FormState>();
+  final formkKey = GlobalKey<FormState>();
   TextEditingController alarmLabel = TextEditingController();
   final RxInt _daysCount = 0.obs;
   final Rx<TimeOfDay> _selectedTime = TimeOfDay.now().obs;
@@ -67,29 +68,7 @@ class AlarmController extends GetxController with StateMixin<List<AlarmInfo>> {
 
   bool get isActive => _isActive.value;
 
-  static final onNotifications = BehaviorSubject<String?>();
-
   TimeOfDay get selectedTime => _selectedTime.value;
-
-  static Future _notificationDetails() async {
-    return const NotificationDetails(
-      android: AndroidNotificationDetails(
-        'channel id',
-        'channel name',
-        channelDescription: 'channel description',
-        importance: Importance.max,
-        sound: UriAndroidNotificationSound(
-            "assets/sound_effects/timer_notifier.wav"),
-        enableLights: true,
-        color: Color(0xff65D1BA),
-        ledColor: Color(0xff65D1BA),
-        ledOnMs: 1000,
-        ledOffMs: 500,
-        playSound: true,
-        priority: Priority.high,
-      ),
-    );
-  }
 
   void increaseNoOfDays() {
     _daysCount.value++;
@@ -141,92 +120,6 @@ class AlarmController extends GetxController with StateMixin<List<AlarmInfo>> {
     });
   }
 
-//!update the alarm in sqf lite
-  Future<void> updateData(int alarmId, int id) async {
-    AlarmInfo model = AlarmInfo(
-      id: id,
-      alarmId: alarmId,
-      alarmDateTime: formatTimeOfDay(_selectedTime.value),
-      alarmLabel: alarmLabel.text,
-      isActive: _isActive.value == true ? 1 : 0,
-      isVibrate: _isVibrate.value == true ? 1 : 0,
-      isOnce: _isOnce.value,
-      isMon: _isMon.value,
-      isTue: _isTue.value,
-      isWed: _isWed.value,
-      isThu: _isThu.value,
-      isFri: _isFri.value,
-      isSat: _isSat.value,
-      isSun: _isSun.value,
-    );
-
-    await LocalDatabase.db!.update(
-      LocalDatabase.tableName,
-      model.toJson(),
-      where: 'id= ?',
-      whereArgs: [id],
-    );
-  }
-
-  static Future init({bool initScheduled = false}) async {
-    //android initializationSettingAndroid
-    var initializationSettingAndroid =
-        const AndroidInitializationSettings('@mipmap/ic_launcher');
-
-//IOS initializationSettingIOS
-    var initializationSettingIOS = DarwinInitializationSettings(
-        requestAlertPermission: true,
-        requestBadgePermission: true,
-        requestSoundPermission: true,
-        onDidReceiveLocalNotification:
-            (int? id, String? title, String? body, String? payload) async {});
-
-//initializationSetting
-    var initializationSettings = InitializationSettings(
-        android: initializationSettingAndroid, iOS: initializationSettingIOS);
-
-//initialization
-    await flutterLocalNitificationPlugin.initialize(initializationSettings,
-        onDidReceiveNotificationResponse:
-            (NotificationResponse notificationResponse) async {
-      final String? payload = notificationResponse.payload;
-      if (notificationResponse.payload != null) {
-        onNotifications.add(payload);
-      }
-    });
-  }
-
-//!simple notification
-  static Future showNotification({
-    int id = 0,
-    String? title,
-    String? body,
-    String? payLoad,
-  }) async =>
-      flutterLocalNitificationPlugin.show(
-          id, title, body, await _notificationDetails(),
-          payload: payLoad);
-
-//!schedule notification
-  Future showScheduledNotification({
-    int id = 0,
-    String? title,
-    String? body,
-    String? payLoad,
-    required DateTime scheduledDate,
-  }) async {
-    await flutterLocalNitificationPlugin.zonedSchedule(
-        id,
-        title,
-        body,
-        tz.TZDateTime.from(scheduledDate, tz.local),
-        await _notificationDetails(),
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        androidAllowWhileIdle: true);
-    // audio.play();
-  }
-
   void updateValue() async {
     _isBatteryOptimizationDisabled.value =
         (await DisableBatteryOptimization.isBatteryOptimizationDisabled)!;
@@ -270,7 +163,7 @@ class AlarmController extends GetxController with StateMixin<List<AlarmInfo>> {
       final file = File('$path/$alarmId.txt');
       final contents = await file.readAsString();
       AlarmInfo alarmDetails = AlarmInfo.fromJson(jsonDecode(contents));
-      showNotification(
+      LocalNotification.showNotification(
           body: alarmDetails.alarmDateTime,
           title: alarmDetails.alarmLabel,
           payLoad: alarmDetails.alarmId.toString());
@@ -418,6 +311,40 @@ class AlarmController extends GetxController with StateMixin<List<AlarmInfo>> {
     file.writeAsString(jsonEncode(model));
   }
 
+//!update the alarm in sqf lite
+  Future<void> updateData(int alarmId, int id) async {
+    DateTime now = DateTime.now();
+
+    DateTime scheduleTime = DateTime(now.year, now.month, now.day,
+        _selectedTime.value.hour, _selectedTime.value.minute);
+    AlarmInfo model = AlarmInfo(
+      id: id,
+      alarmId: alarmId,
+      alarmDateTime: formatTimeOfDay(_selectedTime.value),
+      alarmLabel: alarmLabel.text,
+      isActive: _isActive.value == true ? 1 : 0,
+      isVibrate: _isVibrate.value == true ? 1 : 0,
+      isOnce: _isOnce.value,
+      isMon: _isMon.value,
+      isTue: _isTue.value,
+      isWed: _isWed.value,
+      isThu: _isThu.value,
+      isFri: _isFri.value,
+      isSat: _isSat.value,
+      isSun: _isSun.value,
+    );
+    //delete previous alarm
+    await AndroidAlarmManager.cancel(alarmId);
+    //set the new alarm
+    setAlarm(scheduleTime, alarmId);
+    await LocalDatabase.db!.update(
+      LocalDatabase.tableName,
+      model.toJson(),
+      where: 'id= ?',
+      whereArgs: [id],
+    );
+  }
+
 //!Submit data
   Future<void> submitData() async {
     DateTime now = DateTime.now();
@@ -476,24 +403,6 @@ class AlarmController extends GetxController with StateMixin<List<AlarmInfo>> {
         _alarmInfo.refresh();
         change(alarmInfo, status: RxStatus.success());
         talker.good("Alarm List Lenght : ${_alarmInfo.value.length}");
-//         for (int i = 0; i < list.length; i++) {
-//           talker.good('''\n
-//           Alarm IndexNo : ${_alarmInfo.value[i].id}
-//           Alarm Id : ${_alarmInfo.value[i].alarmId}
-//           Alarm Label : ${_alarmInfo.value[i].alarmLabel}
-//           Alarm Time : ${_alarmInfo.value[i].alarmDateTime}
-//           Alarm isActive : ${_alarmInfo.value[i].isActive}
-//           Alarm isOnce : ${_alarmInfo.value[i].isOnce}
-//           Alarm isMon : ${_alarmInfo.value[i].isMon}
-//           Alarm isTue : ${_alarmInfo.value[i].isTue}
-//           Alarm isWed : ${_alarmInfo.value[i].isWed}
-//           Alarm isThu : ${_alarmInfo.value[i].isThu}
-//           Alarm isFri : ${_alarmInfo.value[i].isFri}
-//           Alarm isSat : ${_alarmInfo.value[i].isSat}
-//           Alarm isSun : ${_alarmInfo.value[i].isSun}
-
-// ''');
-//         }
       } else if (list.isEmpty) {
         change(null, status: RxStatus.empty());
       }
@@ -513,8 +422,8 @@ class AlarmController extends GetxController with StateMixin<List<AlarmInfo>> {
   @override
   void onInit() async {
     super.onInit();
-    init();
-    listenNotification();
+    LocalNotification.init();
+    LocalNotification.listenNotification();
     //initial sqflite database
 
     readAlarms();
@@ -523,15 +432,5 @@ class AlarmController extends GetxController with StateMixin<List<AlarmInfo>> {
     if (!_isBatteryOptimizationDisabled.value) {
       DisableBatteryOptimization.showDisableBatteryOptimizationSettings();
     }
-  }
-
-  void listenNotification() =>
-      onNotifications.stream.listen(onClickedNotification);
-
-  void onClickedNotification(String? payload) {
-    talker.log("Notification Clicked");
-    talker.log(payload);
-    FlutterRingtonePlayer.stop();
-    Get.to(const AlarmDetails(), arguments: payload);
   }
 }

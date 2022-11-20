@@ -1,3 +1,4 @@
+import 'package:clock_app/utils/logger.dart';
 import 'package:flutter/material.dart';
 
 class LifeCycleListener extends WidgetsBindingObserver {
@@ -8,15 +9,18 @@ class LifeCycleListener extends WidgetsBindingObserver {
     switch (state) {
       case AppLifecycleState.paused:
       case AppLifecycleState.inactive:
-        print("ap mini $state");
+        talker.log("ap mini $state");
 
         // saveAlarms();
+        break;
+      case AppLifecycleState.detached:
+        talker.log("App Terminated $state");
         break;
       case AppLifecycleState.resumed:
         // createAlarmPollingIsolate();
         break;
       default:
-        print("Updated lifecycle state: $state");
+        talker.log("App Resumed $state");
     }
   }
 
