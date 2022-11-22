@@ -2,6 +2,8 @@
 
 import 'dart:developer';
 
+import 'package:clock_app/utils/services/battery_optimization_service.dart';
+import 'package:clock_app/utils/services/local_storage_service.dart';
 import 'package:disable_battery_optimization/disable_battery_optimization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -10,8 +12,6 @@ import 'package:get/get.dart';
 
 import '../../controller/alarm_controller.dart';
 import '../../model/alarm_model.dart';
-import '../../utils/local_db.dart';
-import '../../utils/logger.dart';
 import 'alarm_post_view.dart';
 
 class AlarmView extends GetView<AlarmController> {
@@ -20,10 +20,13 @@ class AlarmView extends GetView<AlarmController> {
   Widget build(BuildContext context) {
     //controller instance
     AlarmController alarmController = Get.put(AlarmController());
+    BatteryOptimizationController batteryOptimization =
+        Get.put(BatteryOptimizationController());
 
     return Obx(() {
       var data = alarmController.isActive;
       return RefreshIndicator(
+        color: Colors.greenAccent,
         onRefresh: () {
           return alarmController.readAlarms();
         },
@@ -31,13 +34,13 @@ class AlarmView extends GetView<AlarmController> {
           backgroundColor: Colors.grey.shade900,
           body: controller.obx(
             (state) => Visibility(
-              visible: alarmController.isBatteryOptimizationDisabled,
+              visible: batteryOptimization.isBatteryOptimizationDisabled,
               replacement: Center(
                 child: ElevatedButton(
                   onPressed: () async {
                     DisableBatteryOptimization
                         .showDisableBatteryOptimizationSettings();
-                    alarmController.updateValue();
+                    batteryOptimization.isBatteryOptimizationEnable();
                   },
                   child: const Text("Disable Battery Optimization"),
                 ),
@@ -56,21 +59,7 @@ class AlarmView extends GetView<AlarmController> {
           ),
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () async {
-              // Delete a record
-              // LocalDatabase.db!.delete(
-              //   LocalDatabase.tableName,
-              //   where: 'id= ?',
-              //   whereArgs: ['1'],
-              // );
-
-              // List<Map<String, Object?>> list =
-              //     await LocalDatabase.db!.query(LocalDatabase.tableName);
-
-              // talker.log(list);
-              // alarmController.deletedb();
-              // alarmController.readAlarms();
-              // AlarmController.playAlarm();
-
+              // LocalStorage.deleteAlarm();
               Get.to(
                 const AlarmPostView(),
                 transition: Transition.circularReveal,
@@ -89,8 +78,7 @@ class AlarmView extends GetView<AlarmController> {
     });
   }
 
-  Widget alarmList(
-      AlarmController alarmController, List<AlarmInfo>? alarmInfo) {
+  Widget alarmList(AlarmController alarmController, List<Alarm>? alarmInfo) {
     return Obx(() {
       var data = alarmController.alarmInfo.length;
       log(
@@ -106,7 +94,7 @@ class AlarmView extends GetView<AlarmController> {
   }
 
   Widget alarmCard(
-      List<AlarmInfo>? alarmInfo, int index, AlarmController alarmController) {
+      List<Alarm>? alarmInfo, int index, AlarmController alarmController) {
     List<String> listOfDays() {
       List daysName = [
         {"dayNum": alarmInfo![index].isOnce, "dayName": "Once"},
@@ -129,17 +117,8 @@ class AlarmView extends GetView<AlarmController> {
 
     return GestureDetector(
       onLongPress: () {
-        alarmController.activeUpdate(
-            0, alarmInfo[index].id!, alarmInfo[index].alarmId);
-        // Delete a record
-        LocalDatabase.db!.delete(
-          LocalDatabase.tableName,
-          where: 'id= ?',
-          whereArgs: [alarmInfo[index].id],
-        ).whenComplete(() async {
-          await alarmController.readAlarms();
-          talker.error("Delete Alarm");
-        });
+        // alarmController.deleteAlarm(
+        //     alarmInfo[index].alarmId, alarmInfo[index].id!);
       },
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
@@ -197,8 +176,8 @@ class AlarmView extends GetView<AlarmController> {
                     return Switch(
                       value: alarmInfo[index].isActive == 1 ? true : false,
                       onChanged: (bool value) {
-                        alarmController.activeUpdate(value == true ? 1 : 0,
-                            alarmInfo[index].id!, alarmInfo[index].alarmId);
+                        // alarmController.activeUpdate(value == true ? 1 : 0,
+                        //     alarmInfo[index].id!, alarmInfo[index].alarmId);
                       },
                     );
                   })
@@ -277,7 +256,7 @@ class AlarmView extends GetView<AlarmController> {
                             alarmInfo[index].isFri,
                             alarmInfo[index].isSat,
                             alarmInfo[index].isSun,
-                            alarmInfo[index].id,
+                            0,
                             alarmInfo[index].alarmId,
                           ],
                           transition: Transition.circularReveal,

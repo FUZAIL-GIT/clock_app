@@ -1,4 +1,4 @@
-import 'package:clock_app/utils/logger.dart';
+import 'package:clock_app/utils/services/logging_service.dart';
 import 'package:flutter/material.dart';
 
 class LifeCycleListener extends WidgetsBindingObserver {

@@ -59,13 +59,14 @@ class AlarmPostView extends GetView {
               TextButton(
                 onPressed: () async {
                   if (alarmController.formkKey.currentState!.validate()) {
-                    var result = args == null
-                        ? alarmController.submitData()
-                        : alarmController.updateData(
-                            args[12],
-                            args[11],
-                          );
-
+                    // var result = args == null
+                    // ? alarmController.submitData()
+                    // : alarmController.updateData(
+                    //     args[12],
+                    //     args[11],
+                    //   );
+                    var result = alarmController.submitData();
+                    await alarmController.readAlarms();
                     if (result != null) {
                       Get.to(
                         const HomeView(),

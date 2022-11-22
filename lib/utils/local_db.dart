@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:sqflite/sqflite.dart';
 
-import 'logger.dart';
+import 'services/logging_service.dart';
 
 class LocalDatabase {
   static Database? db;

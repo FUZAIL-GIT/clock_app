@@ -4,11 +4,11 @@ import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:get/get.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../main.dart';
+import '../../main.dart';
 import 'package:timezone/timezone.dart' as tz;
 
-import '../view/screens/alarmdetails_view.dart';
-import 'logger.dart';
+import '../../view/screens/alarmdetails_view.dart';
+import 'logging_service.dart';
 
 class LocalNotification {
   static Future _notificationDetails() async {
