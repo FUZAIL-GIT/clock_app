@@ -117,8 +117,9 @@ class AlarmView extends GetView<AlarmController> {
 
     return GestureDetector(
       onLongPress: () {
-        // alarmController.deleteAlarm(
-        //     alarmInfo[index].alarmId, alarmInfo[index].id!);
+        alarmController.deleteAlarm(
+          index,
+        );
       },
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),

@@ -1,15 +1,13 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
-
 import 'package:clock_app/model/alarm_model.dart';
 import 'package:clock_app/utils/globals.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
-
 import 'logging_service.dart';
 
 class LocalStorage {
+  static const String fileName = "alarms";
   static Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
     talker.info("Local Storage Directory :  ${directory.path}");
@@ -17,7 +15,7 @@ class LocalStorage {
     return directory.path;
   }
 
-  static Future<File> localFile(String fileName) async {
+  static Future<File> localFile() async {
     final path = await _localPath;
     return File('$path/$fileName.json');
   }
@@ -44,7 +42,7 @@ class LocalStorage {
     required int isSat,
     required int isSun,
   }) async {
-    final file = await localFile("alarms");
+    final file = await localFile();
     await file.create();
     var content = await file.readAsString();
     List alarmInfo = content != "" ? jsonDecode(content) : [];
@@ -73,16 +71,29 @@ class LocalStorage {
   }
 
   static Future readAlarm() async {
-    final file = await localFile("alarms");
+    final file = await localFile();
     var content = await file.readAsString();
     talker.good(content);
     var alarms = content != "" ? alarmFromJson(content) : null;
     return alarms;
   }
 
-  static void deleteAlarm() async {
-    final file = await localFile("alarms");
+  static void deleteDb() async {
+    final file = await localFile();
     file.delete();
+  }
+
+  static void deleteAlarm(int index) async {
+    final file = await localFile();
+
+    var content = await file.readAsString();
+    List alarmInfo = jsonDecode(content);
+    alarmInfo.removeAt(index);
+    file.writeAsString(jsonEncode(alarmInfo));
+
+    for (var i = 0; i < alarmInfo.length; i++) {
+      talker.log(alarmInfo[i]["alarmLabel"]);
+    }
   }
 
   static void updateAlarm() {}

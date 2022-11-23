@@ -1,5 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member, unused_element
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
@@ -273,48 +274,13 @@ class AlarmController extends GetxController with StateMixin<List<Alarm>> {
     return File('$path/$fileName.txt');
   }
 
-  void deleteAlarm(int alarmId, id) async {
+  void deleteAlarm(int index) async {
     try {
-      final directory = await getApplicationDocumentsDirectory();
-      final path = directory.path;
-
-      final file = File('$path/$alarmId.txt');
-      file.delete();
+      LocalStorage.deleteAlarm(index);
     } catch (e) {
       talker.error(e);
     }
-
-    // Delete a record
-    LocalDatabase.db!.delete(
-      LocalDatabase.tableName,
-      where: 'id= ?',
-      whereArgs: [id],
-    ).whenComplete(() async {
-      await readAlarms();
-      talker.log("Delete Alarm");
-    });
   }
-
-  // Future submit(int alarmId) async {
-  //   final file = await localFile(alarmId.toString());
-
-  //   AlarmInfo model = AlarmInfo(
-  //     alarmId: alarmId,
-  //     alarmDateTime: formatTimeOfDay(_selectedTime.value),
-  //     alarmLabel: alarmLabel.text.toString(),
-  //     isActive: _isActive.value == true ? 1 : 0,
-  //     isVibrate: _isVibrate.value == true ? 1 : 0,
-  //     isOnce: _isOnce.value,
-  //     isMon: _isMon.value,
-  //     isTue: _isTue.value,
-  //     isWed: _isWed.value,
-  //     isThu: _isThu.value,
-  //     isFri: _isFri.value,
-  //     isSat: _isSat.value,
-  //     isSun: _isSun.value,
-  //   );
-  //   file.writeAsString(jsonEncode(model));
-  // }
 
 // //!update the alarm in sqf lite
 //   Future<void> updateData(int alarmId, int id) async {
@@ -352,12 +318,8 @@ class AlarmController extends GetxController with StateMixin<List<Alarm>> {
 
 //!Submit data
   Future<void> submitData() async {
-    // DateTime now = DateTime.now();
-    // DateTime scheduleTime = DateTime(now.year, now.month, now.day,
-    //     _selectedTime.value.hour, _selectedTime.value.minute);
     int alarmId = Random().nextInt(pow(2, 31) as int);
-    // await submit(alarmId);
-    // setAlarm(scheduleTime, alarmId);
+
     LocalStorage.createAlarm(
       alarmId: alarmId,
       alarmDateTime: _selectedTime.value,
@@ -373,33 +335,6 @@ class AlarmController extends GetxController with StateMixin<List<Alarm>> {
       isSat: _isSat.value,
       isSun: _isSun.value,
     );
-    // AlarmInfo model = AlarmInfo(
-    //   alarmId: alarmId,
-    //   alarmDateTime: formatTimeOfDay(_selectedTime.value),
-    //   alarmLabel: alarmLabel.text.toString(),
-    //   isActive: _isActive.value == true ? 1 : 0,
-    //   isVibrate: _isVibrate.value == true ? 1 : 0,
-    //   isOnce: _isOnce.value,
-    //   isMon: _isMon.value,
-    //   isTue: _isTue.value,
-    //   isWed: _isWed.value,
-    //   isThu: _isThu.value,
-    //   isFri: _isFri.value,
-    //   isSat: _isSat.value,
-    //   isSun: _isSun.value,
-    // );
-
-    // await LocalDatabase.db!
-    //     .insert(
-    //   LocalDatabase.tableName,
-    //   model.toJson(),
-    // )
-    //     .whenComplete(
-    //   () async {
-    //     await readAlarms();
-    //     talker.good("Date inserted Successfully");
-    //   },
-    // );
   }
 
 //!delete alarm
@@ -414,13 +349,13 @@ class AlarmController extends GetxController with StateMixin<List<Alarm>> {
     );
   }
 
-  Future<List?> readAlarms() async {
+  Future<List<Alarm>?> readAlarms() async {
     try {
       var alarmInfo = await LocalStorage.readAlarm();
 
       if (alarmInfo != null) {
         _alarmInfo.refresh();
-        talker.log(alarmInfo);
+
         change(alarmInfo, status: RxStatus.success());
         return alarmInfo;
       } else if (alarmInfo == null) {
