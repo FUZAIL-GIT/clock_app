@@ -6,7 +6,7 @@ import 'services/logging_service.dart';
 
 //!method to convert TimeOfDay to String
 
-String formatTimeOfDay(TimeOfDay tod) {
+String timeOfDaytoString(TimeOfDay tod) {
   final now = DateTime.now();
   final dt = DateTime(now.year, now.month, now.day, tod.hour, tod.minute);
   final format = DateFormat.jm(); //"6:00 AM"

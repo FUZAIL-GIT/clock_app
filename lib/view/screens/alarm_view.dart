@@ -3,7 +3,6 @@
 import 'dart:developer';
 
 import 'package:clock_app/utils/services/battery_optimization_service.dart';
-import 'package:clock_app/utils/services/local_storage_service.dart';
 import 'package:disable_battery_optimization/disable_battery_optimization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -84,11 +83,25 @@ class AlarmView extends GetView<AlarmController> {
       log(
         alarmController.alarmInfo.length.toString(),
       );
-      return ListView.builder(
-        itemCount: alarmInfo!.length,
-        itemBuilder: (context, index) {
-          return alarmCard(alarmInfo, index, alarmController);
-        },
+      return Visibility(
+        visible: alarmInfo!.isNotEmpty,
+        replacement: Center(
+          child: Text(
+            "No Alarms to show".toUpperCase(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontFamily: 'Orbitron',
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        child: ListView.builder(
+          itemCount: alarmInfo.length,
+          itemBuilder: (context, index) {
+            return alarmCard(alarmInfo, index, alarmController);
+          },
+        ),
       );
     });
   }
@@ -119,6 +132,7 @@ class AlarmView extends GetView<AlarmController> {
       onLongPress: () {
         alarmController.deleteAlarm(
           index,
+          alarmInfo[index].alarmId,
         );
       },
       child: Padding(
@@ -177,6 +191,25 @@ class AlarmView extends GetView<AlarmController> {
                     return Switch(
                       value: alarmInfo[index].isActive == 1 ? true : false,
                       onChanged: (bool value) {
+                        alarmController.updateStatus(
+                          index,
+                          alarmInfo[index].alarmId,
+                          {
+                            "alarmId": alarmInfo[index].alarmId,
+                            "alarmDateTime": alarmInfo[index].alarmDateTime,
+                            "alarmLabel": alarmInfo[index].alarmLabel,
+                            "isActive": alarmInfo[index].isActive == 1 ? 0 : 1,
+                            "isVibrate": alarmInfo[index].isVibrate,
+                            "isOnce": alarmInfo[index].isOnce,
+                            "isMon": alarmInfo[index].isMon,
+                            "isTue": alarmInfo[index].isTue,
+                            "isWed": alarmInfo[index].isWed,
+                            "isThu": alarmInfo[index].isThu,
+                            "isFri": alarmInfo[index].isFri,
+                            "isSat": alarmInfo[index].isSat,
+                            "isSun": alarmInfo[index].isSun
+                          },
+                        );
                         // alarmController.activeUpdate(value == true ? 1 : 0,
                         //     alarmInfo[index].id!, alarmInfo[index].alarmId);
                       },
@@ -217,17 +250,6 @@ class AlarmView extends GetView<AlarmController> {
                       );
                     }),
               ),
-
-              // Text(
-              //   noOfDays(),
-              //   style: TextStyle(
-              //     color: Colors.white,
-              //     fontFamily: 'Orbitron',
-              //     fontWeight: FontWeight.normal,
-              //     letterSpacing: 0.7,
-              //     fontSize: 15.sp,
-              //   ),
-              // ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

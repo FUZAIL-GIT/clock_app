@@ -1,23 +1,18 @@
 // ignore_for_file: invalid_use_of_protected_member, unused_element
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
-import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
+import 'package:clock_app/utils/services/alarm_service.dart';
 import 'package:clock_app/utils/services/battery_optimization_service.dart';
 import 'package:clock_app/utils/services/local_notification_service.dart';
 import 'package:clock_app/utils/services/local_storage_service.dart';
+import 'package:clock_app/view/screens/home_view.dart';
 import 'package:day_night_time_picker/lib/daynight_timepicker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
-import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:sqflite/sqflite.dart';
 import '../model/alarm_model.dart';
 import '../utils/globals.dart';
-import '../utils/local_db.dart';
 import '../utils/services/logging_service.dart';
 
 class AlarmController extends GetxController with StateMixin<List<Alarm>> {
@@ -82,7 +77,6 @@ class AlarmController extends GetxController with StateMixin<List<Alarm>> {
     int isFri,
     int isSat,
     int isSun,
-    int id,
     int alarmId,
   ) async {
     _selectedTime.value = stringToTimeOfDay(dateTime);
@@ -98,119 +92,12 @@ class AlarmController extends GetxController with StateMixin<List<Alarm>> {
     _isSun.value = isSun;
   }
 
-  void activeUpdate(int value, int id, int alarmIId) async {
-    _isActive.value = value == 1 ? true : false;
-    Map<String, dynamic> row = {
-      "id": id,
-      "isActive": value,
-    };
-    await AndroidAlarmManager.cancel(alarmIId);
-    await LocalDatabase.db!.update(
-      LocalDatabase.tableName,
-      row,
-      where: 'id= ?',
-      whereArgs: [id],
-    ).whenComplete(() async {
-      await readAlarms();
-      talker.good("Alarm is : ${value == 1 ? "Activated" : "De-Activated "}");
-    });
-  }
-
-//!set the alarm in android alarm manager
-  void setAlarm(DateTime scheduleTime, int alarmId) async {
-    talker.info("setAlarm on :$scheduleTime");
-    // final int alarmID = 1;
-    // final DateTime scheduleTime = DateTime.now().add(Duration(seconds: 5));
-    await AndroidAlarmManager.oneShotAt(
-      scheduleTime,
-      alarmId,
-      playAlarm,
-      rescheduleOnReboot: true,
-      wakeup: true,
-      exact: true,
-      alarmClock: true,
-    );
-  }
-
-//!onchange
+//onchange
   void isActiveOnChange(bool value) {
     _isVibrate.value = value;
   }
 
-  // static Future<void> readlocaldb(String alarmId) async {
-  //   try {
-  //     final directory = await getApplicationDocumentsDirectory();
-  //     final path = directory.path;
-
-  //     final file = File('$path/$alarmId.txt');
-  //     final contents = await file.readAsString();
-  //     AlarmInfo alarmDetails = AlarmInfo.fromJson(jsonDecode(contents));
-  //     LocalNotification.showNotification(
-  //         body: alarmDetails.alarmDateTime,
-  //         title: alarmDetails.alarmLabel,
-  //         payLoad: alarmDetails.alarmId.toString());
-  //     talker.log(alarmDetails.isOnce);
-  //     // if (alarmDetails.isOnce == 1) {
-  //     //   Map<String, dynamic> row = {
-  //     //     "id": alarmDetails.id,
-  //     //     "isActive": false,
-  //     //   };
-  //     //   await LocalDatabase.db!.update(
-  //     //     LocalDatabase.tableName,
-  //     //     row,
-  //     //     where: 'id= ?',
-  //     //     whereArgs: [alarmDetails.id],
-  //     //   ).whenComplete(() async {
-  //     //     // await readAlarms();
-  //     //     talker.good("Alarm is  De-Activated");
-  //     //   });
-  //     // }
-  //     talker.log(alarmDetails.toString());
-  //     // talker.log(result.alarmLabel);
-  //   } catch (e) {
-  //     talker.error(e);
-  //   }
-  // }
-
-  static void alarmMedia() async {
-    final Iterable<Duration> pauses = [
-      const Duration(milliseconds: 500),
-      const Duration(milliseconds: 1000),
-      const Duration(milliseconds: 500),
-      const Duration(milliseconds: 1000),
-      const Duration(milliseconds: 500),
-      const Duration(milliseconds: 1000),
-      const Duration(milliseconds: 500),
-      const Duration(milliseconds: 1000),
-      const Duration(milliseconds: 500),
-      const Duration(milliseconds: 1000),
-      const Duration(milliseconds: 500),
-    ];
-
-    bool canVibrate = await Vibrate.canVibrate;
-    if (canVibrate) {
-      Vibrate.vibrateWithPauses(pauses);
-    }
-    FlutterRingtonePlayer.play(
-      android: AndroidSounds.alarm,
-
-      ios: IosSounds.glass,
-      looping: false, // Android only - API >= 28
-      volume: 10, // Android only - API >= 28
-      asAlarm: true, // Android only - all APIs
-    );
-  }
-
-//!play alarm
-  static void playAlarm(int alarmId) async {
-    Future.delayed(const Duration(seconds: 1), () async {
-      // await readlocaldb(alarmId.toString());
-    });
-    alarmMedia();
-    talker.log("ID : $alarmId");
-  }
-
-//! Select for Time
+// Select for Time
   void pickTime(BuildContext context) async {
     Navigator.of(context).push(
       showPicker(
@@ -224,7 +111,7 @@ class AlarmController extends GetxController with StateMixin<List<Alarm>> {
     );
   }
 
-//!selectDay
+//selectDay
   void onSelectDay(String label, int value) {
     talker.log("$label $value");
     if (label == 'isOnce') {
@@ -262,64 +149,50 @@ class AlarmController extends GetxController with StateMixin<List<Alarm>> {
     }
   }
 
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    talker.info("Local Storage Directory :  ${directory.path}");
-
-    return directory.path;
-  }
-
-  Future<File> localFile(String fileName) async {
-    final path = await _localPath;
-    return File('$path/$fileName.txt');
-  }
-
-  void deleteAlarm(int index) async {
+//delete alarm
+  void deleteAlarm(int index, int alarmId) async {
     try {
-      LocalStorage.deleteAlarm(index);
+      await AlarmService.deleteAlarm(alarmId);
+      LocalStorage.deleteAlarm(index).whenComplete(() async {
+        talker.good("AlarmInfo Removed From Local Database (index : $index)");
+        _alarmInfo.refresh();
+        await readAlarms();
+        Get.to(
+          const HomeView(),
+          transition: Transition.circularReveal,
+          curve: Curves.bounceOut,
+          duration: const Duration(seconds: 2),
+        );
+        Get.delete<AlarmController>();
+      });
     } catch (e) {
       talker.error(e);
     }
   }
 
-// //!update the alarm in sqf lite
-//   Future<void> updateData(int alarmId, int id) async {
-//     DateTime now = DateTime.now();
+//activate de-activate alarm
+  void updateStatus(int index, int alarmId, var model) async {
+    await LocalStorage.updateAlarmStatus(index, alarmId, model)
+        .whenComplete(() async {
+      _alarmInfo.refresh();
+      await readAlarms();
+      Get.to(
+        const HomeView(),
+        transition: Transition.circularReveal,
+        curve: Curves.bounceOut,
+        duration: const Duration(seconds: 2),
+      );
+      Get.delete<AlarmController>();
+    });
+  }
 
-//     DateTime scheduleTime = DateTime(now.year, now.month, now.day,
-//         _selectedTime.value.hour, _selectedTime.value.minute);
-//     AlarmInfo model = AlarmInfo(
-//       id: id,
-//       alarmId: alarmId,
-//       alarmDateTime: formatTimeOfDay(_selectedTime.value),
-//       alarmLabel: alarmLabel.text,
-//       isActive: _isActive.value == true ? 1 : 0,
-//       isVibrate: _isVibrate.value == true ? 1 : 0,
-//       isOnce: _isOnce.value,
-//       isMon: _isMon.value,
-//       isTue: _isTue.value,
-//       isWed: _isWed.value,
-//       isThu: _isThu.value,
-//       isFri: _isFri.value,
-//       isSat: _isSat.value,
-//       isSun: _isSun.value,
-//     );
-//     //delete previous alarm
-//     await AndroidAlarmManager.cancel(alarmId);
-//     //set the new alarm
-//     setAlarm(scheduleTime, alarmId);
-//     await LocalDatabase.db!.update(
-//       LocalDatabase.tableName,
-//       model.toJson(),
-//       where: 'id= ?',
-//       whereArgs: [id],
-//     );
-//   }
-
-//!Submit data
+//Submit data
   Future<void> submitData() async {
+    DateTime now = DateTime.now();
+    DateTime scheduleTime = DateTime(now.year, now.month, now.day,
+        _selectedTime.value.hour, _selectedTime.value.minute);
     int alarmId = Random().nextInt(pow(2, 31) as int);
-
+//submit the data to the local data base
     LocalStorage.createAlarm(
       alarmId: alarmId,
       alarmDateTime: _selectedTime.value,
@@ -335,20 +208,30 @@ class AlarmController extends GetxController with StateMixin<List<Alarm>> {
       isSat: _isSat.value,
       isSun: _isSun.value,
     );
+
+//create alarm
+    AlarmService.setAlarm(scheduleTime, alarmId);
   }
 
-//!delete alarm
-  void deletedb() async {
-    String path = '${await getDatabasesPath()}alarm_info.db';
-
-    await deleteDatabase(path).whenComplete(
-      () async {
-        Vibrate.vibrate();
-        talker.error("DataBase Deleted");
-      },
-    );
+  Future<void> updateAlarm(int index, int alarmId) async {
+    await LocalStorage.updateAlarm(index, alarmId, {
+      "alarmId": alarmId,
+      "alarmDateTime": timeOfDaytoString(_selectedTime.value),
+      "alarmLabel": alarmLabel.text.toString(),
+      "isActive": _isActive.value == true ? 1 : 0,
+      "isVibrate": _isVibrate.value == true ? 1 : 0,
+      "isOnce": _isOnce.value,
+      "isMon": _isMon.value,
+      "isTue": _isTue.value,
+      "isWed": _isWed.value,
+      "isThu": _isThu.value,
+      "isFri": _isFri.value,
+      "isSat": _isSat.value,
+      "isSun": _isSun.value,
+    });
   }
 
+//read Alarms from the Local Database
   Future<List<Alarm>?> readAlarms() async {
     try {
       var alarmInfo = await LocalStorage.readAlarm();
@@ -380,7 +263,6 @@ class AlarmController extends GetxController with StateMixin<List<Alarm>> {
     // await LocalStorage.init();
     LocalNotification.init();
     LocalNotification.listenNotification();
-    //initial sqflite database
 
     await readAlarms();
   }

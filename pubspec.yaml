@@ -18,7 +18,6 @@ dependencies:
   duration_picker: ^1.1.0+1
   percent_indicator: ^4.2.2
   audiofileplayer: ^2.1.0
-  sqflite: ^2.1.0+1
   flutter_local_notifications: ^12.0.2
   rxdart: ^0.27.5
   timezone: ^0.9.0
@@ -32,6 +31,7 @@ dependencies:
   flutter_vibrate: ^1.3.0
   http: ^0.13.5
   path_provider: ^2.0.11
+  avatar_glow: ^2.0.2
 
 dev_dependencies:
   flutter_test:

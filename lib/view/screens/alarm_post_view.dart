@@ -29,7 +29,6 @@ class AlarmPostView extends GetView {
         args[9],
         args[10],
         args[11],
-        args[12],
       );
     }
     return Form(
@@ -59,13 +58,13 @@ class AlarmPostView extends GetView {
               TextButton(
                 onPressed: () async {
                   if (alarmController.formkKey.currentState!.validate()) {
-                    // var result = args == null
-                    // ? alarmController.submitData()
-                    // : alarmController.updateData(
-                    //     args[12],
-                    //     args[11],
-                    //   );
-                    var result = alarmController.submitData();
+                    var result = args == null
+                        ? alarmController.submitData()
+                        : alarmController.updateAlarm(
+                            args[11],
+                            args[12],
+                          );
+                    // var result = alarmController.submitData();
                     await alarmController.readAlarms();
                     if (result != null) {
                       Get.to(
@@ -77,31 +76,6 @@ class AlarmPostView extends GetView {
                       Get.delete<AlarmController>();
                     }
                   }
-
-                  // DateTime now = DateTime.now();
-                  // //!method to convert String to TimeOfDay
-                  // TimeOfDay stringToTimeOfDay(String tod) {
-                  //   final format = DateFormat.jm(); //"6:00 AM"
-                  //   return TimeOfDay.fromDateTime(format.parse(tod));
-                  // }
-
-                  // //!method to convert TimeOfDay to String
-                  // String timeOfDayToString(TimeOfDay tod) {
-                  //   final now = new DateTime.now();
-                  //   final dt = DateTime(
-                  //       now.year, now.month, now.day, tod.hour, tod.minute);
-                  //   final format = DateFormat.jm(); //"6:00 AM"
-                  //   return format.format(dt);
-                  // }
-
-                  // TimeOfDay tod = alarmController.selectedTime; //TimeOfDay
-                  // String stringtod = timeOfDayToString(tod); //String TimeOfDay
-                  // TimeOfDay formatedtod = stringToTimeOfDay(stringtod);
-                  // talker.log(formatedtod);
-                  // DateTime scheduleTime = DateTime(now.year, now.month, now.day,
-                  //     formatedtod.hour, formatedtod.minute); //DateTime
-                  // alarmController.showScheduledNotification(
-                  //     scheduledDate: scheduleTime);
                 },
                 child: const Text(
                   "Save",

@@ -62,7 +62,7 @@ class LocalNotification {
 
   //!simple notification
   static Future showNotification({
-    int id = 0,
+    required int id,
     String? title,
     String? body,
     String? payLoad,
@@ -98,6 +98,6 @@ class LocalNotification {
     talker.log("Notification Clicked");
     talker.log(payload);
     FlutterRingtonePlayer.stop();
-    Get.to(const AlarmDetails(), arguments: payload);
+    Get.offAll(const AlarmDetails(), arguments: payload);
   }
 }

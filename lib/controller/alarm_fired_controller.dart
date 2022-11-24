@@ -1,48 +1,52 @@
-// ignore_for_file: invalid_use_of_protected_member
-
+import 'package:clock_app/controller/alarm_controller.dart';
+import 'package:clock_app/utils/services/logging_service.dart';
+import 'package:flutter/animation.dart';
 import 'package:get/get.dart';
 
 import '../model/alarm_model.dart';
-import '../utils/local_db.dart';
-import '../utils/services/logging_service.dart';
 
-class FiredAlarmController extends GetxController with StateMixin<List<Alarm>> {
-  final String alarmId;
-  FiredAlarmController({required this.alarmId});
-  final _alarmInfo = <Alarm>[].obs;
-  List<Alarm> get alarmInfo => _alarmInfo.value;
-  Future<List> readAlarms() async {
-    try {
-      List<Map<String, Object?>> list = await LocalDatabase.db!.query(
-        LocalDatabase.tableName,
-        where: 'alarmId= ?',
-        whereArgs: [alarmId],
-      );
+class AlarmFireController extends GetxController
+    with StateMixin<Alarm>, GetTickerProviderStateMixin {
+  late AlarmController alarmController;
+  late final RxInt _alarmId = 0.obs;
 
-      if (list.isNotEmpty) {
-        _alarmInfo.value = list.map((x) => Alarm.fromJson(x)).toList();
-        _alarmInfo.refresh();
-        change(alarmInfo, status: RxStatus.success());
-        talker.good(_alarmInfo[0].alarmDateTime);
-      } else if (list.isEmpty) {
-        change(null, status: RxStatus.empty());
-      }
-    } catch (e) {
-      talker.error(e);
-      change(
-        null,
-        status: RxStatus.error(
-          e.toString(),
-        ),
-      );
-    }
-
-    return alarmInfo;
+  late final AnimationController animationController;
+  late final Animation animation;
+  void arg(int id) {
+    _alarmId.value = id;
   }
 
   @override
-  void onInit() {
-    readAlarms();
+  void onInit() async {
     super.onInit();
+
+    animationController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 2));
+    animationController.repeat(reverse: true);
+    animation = Tween(begin: 2.0, end: 15.0).animate(animationController)
+      ..addListener(() {
+        // setState(() {});
+      });
+    alarmController = Get.put(AlarmController());
+    try {
+      List<Alarm>? alarm = await alarmController.readAlarms();
+      for (var i = 0; i < alarm!.length; i++) {
+        if (alarm[i].alarmId == _alarmId.value) {
+          change(alarm[i], status: RxStatus.success());
+
+          return;
+        }
+      }
+    } catch (e) {
+      talker.error(e);
+      change(null, status: RxStatus.error());
+    }
+  }
+
+  @override
+  void onClose() {
+    animationController.dispose();
+    // alarmController.dispose();
+    super.onClose();
   }
 }
