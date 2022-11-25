@@ -1,10 +1,19 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
+import 'package:bringtoforeground/bringtoforeground.dart';
+import 'package:clock_app/main.dart';
 import 'package:clock_app/model/alarm_model.dart';
 import 'package:clock_app/utils/services/local_notification_service.dart';
 import 'package:clock_app/utils/services/local_storage_service.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:flutter_vibrate/flutter_vibrate.dart';
+import 'package:get/get.dart';
 
+import '../../view/screens/alarmdetails_view.dart';
 import 'logging_service.dart';
 
 class AlarmService {
@@ -43,6 +52,19 @@ class AlarmService {
   static void playAlarm(int alarmId) async {
     alarmMedia();
     talker.log("ID : $alarmId");
+    // if (Platform.isAndroid) {
+    //   restartApp();
+    //   Timer(const Duration(seconds: 5), () {
+    //     Bringtoforeground.bringAppToForeground();
+    //   });
+    // }
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (_) => AlarmDetails(),
+
+    //   ),
+    // );
     //call local notification
     List<Alarm> alarms = await LocalStorage.readAlarm();
     for (var i = 0; i < alarms.length; i++) {

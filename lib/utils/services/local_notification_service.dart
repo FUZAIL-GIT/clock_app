@@ -98,6 +98,6 @@ class LocalNotification {
     talker.log("Notification Clicked");
     talker.log(payload);
     FlutterRingtonePlayer.stop();
-    Get.offAll(const AlarmDetails(), arguments: payload);
+    Get.to(const AlarmDetails(), arguments: payload);
   }
 }

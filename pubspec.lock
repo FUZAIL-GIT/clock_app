@@ -53,10 +53,12 @@ packages:
   bringtoforeground:
     dependency: "direct main"
     description:
-      name: bringtoforeground
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.0.2"
+      path: "."
+      ref: master
+      resolved-ref: "5235cea016ba2f825b0e57f6ac56b8792acab29a"
+      url: "https://github.com/GiddyNaya/bring_to_foreground.git"
+    source: git
+    version: "0.0.1"
   characters:
     dependency: transitive
     description:

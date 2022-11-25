@@ -22,21 +22,19 @@ class AlarmDetails extends GetView<AlarmFireController> {
       int.parse(arg),
     );
 
-    return WillPopScope(
-      onWillPop: () async => false,
-      child: Scaffold(
-        body: controller.obx(
-          (state) => Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              timeWidget(state),
-              gestureContainer(),
-            ],
-          ),
-          onLoading: const Center(child: CircularProgressIndicator()),
-          onEmpty: const Center(child: Text('No Alarms found')),
-          onError: (error) => Text(error.toString()),
+    return Scaffold(
+      backgroundColor: ThemeColors.darkBgColor2,
+      body: controller.obx(
+        (state) => Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            timeWidget(state),
+            // gestureContainer(),
+          ],
         ),
+        onLoading: const Center(child: CircularProgressIndicator()),
+        onEmpty: const Center(child: Text('No Alarms found')),
+        onError: (error) => Text(error.toString()),
       ),
     );
   }
@@ -73,25 +71,33 @@ class AlarmDetails extends GetView<AlarmFireController> {
     );
   }
 
-  Widget gestureContainer() {
-    return GestureDetector(
-      onPanUpdate: (details) {
-        // Swiping in right direction.
-        if (details.delta.dx > 0) {
-          log("Right");
-        }
+  Widget actionButtons() {
+    return Row(
+      children: [
+        button(),
+      ],
+    );
+  }
 
-        // Swiping in left direction.
-        if (details.delta.dx < 0) {
-          log("Left");
-        }
-      },
-      child: Container(
-        color: Colors.green,
-        height: 200,
-        width: double.infinity,
+  Widget button() {
+    return Container(
+      height: 50,
+      decoration: BoxDecoration(
+        boxShadow: [
+          const BoxShadow(
+            blurRadius: 15,
+            spreadRadius: 1,
+            offset: Offset(4, 4),
+            color: Colors.black,
+          ),
+          BoxShadow(
+            blurRadius: 15,
+            spreadRadius: 1,
+            offset: const Offset(-4, -4),
+            color: Colors.grey.shade800,
+          ),
+        ],
       ),
-      
     );
   }
 }

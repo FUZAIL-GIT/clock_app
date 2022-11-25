@@ -42,3 +42,20 @@ void main() async {
         }),
   ));
 }
+
+void restartApp() {
+  runApp(DevicePreview(
+    enabled: true,
+    builder: (context) => ScreenUtilInit(
+        designSize: const Size(360, 690),
+        builder: (context, child) {
+          return GetMaterialApp(
+            title: "Application",
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData.dark(),
+            home: const HomeView(),
+            // getPages: [GetPage(name: "name", page: page)],
+          );
+        }),
+  ));
+}

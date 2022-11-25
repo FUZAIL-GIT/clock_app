@@ -9,7 +9,7 @@ class LifeCycleListener extends WidgetsBindingObserver {
     switch (state) {
       case AppLifecycleState.paused:
       case AppLifecycleState.inactive:
-        talker.log("ap mini $state");
+        talker.log("App Minimize $state");
 
         // saveAlarms();
         break;

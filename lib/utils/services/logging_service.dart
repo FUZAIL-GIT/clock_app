@@ -9,8 +9,9 @@ final talker = Talker(
     useConsoleLogs: true,
   ),
   logger: TalkerLogger(
+    formater: const ExtendedLoggerFormatter(),
     settings: TalkerLoggerSettings(
-      colors: {
+       colors: {
         LogLevel.info: AnsiPen()..cyan(),
         LogLevel.good: AnsiPen()..green(),
       },

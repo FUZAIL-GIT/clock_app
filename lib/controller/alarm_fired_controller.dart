@@ -1,6 +1,5 @@
 import 'package:clock_app/controller/alarm_controller.dart';
 import 'package:clock_app/utils/services/logging_service.dart';
-import 'package:flutter/animation.dart';
 import 'package:get/get.dart';
 
 import '../model/alarm_model.dart';
@@ -10,8 +9,6 @@ class AlarmFireController extends GetxController
   late AlarmController alarmController;
   late final RxInt _alarmId = 0.obs;
 
-  late final AnimationController animationController;
-  late final Animation animation;
   void arg(int id) {
     _alarmId.value = id;
   }
@@ -20,13 +17,6 @@ class AlarmFireController extends GetxController
   void onInit() async {
     super.onInit();
 
-    animationController =
-        AnimationController(vsync: this, duration: const Duration(seconds: 2));
-    animationController.repeat(reverse: true);
-    animation = Tween(begin: 2.0, end: 15.0).animate(animationController)
-      ..addListener(() {
-        // setState(() {});
-      });
     alarmController = Get.put(AlarmController());
     try {
       List<Alarm>? alarm = await alarmController.readAlarms();
@@ -41,12 +31,5 @@ class AlarmFireController extends GetxController
       talker.error(e);
       change(null, status: RxStatus.error());
     }
-  }
-
-  @override
-  void onClose() {
-    animationController.dispose();
-    // alarmController.dispose();
-    super.onClose();
   }
 }
