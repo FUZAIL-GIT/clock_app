@@ -171,7 +171,7 @@ class AlarmController extends GetxController with StateMixin<List<Alarm>> {
   }
 
 //activate de-activate alarm
-  void updateStatus(int index, int alarmId, var model) async {
+  Future<void> updateStatus(int index, int alarmId, var model) async {
     await LocalStorage.updateAlarmStatus(index, alarmId, model)
         .whenComplete(() async {
       _alarmInfo.refresh();
@@ -187,13 +187,15 @@ class AlarmController extends GetxController with StateMixin<List<Alarm>> {
   }
 
 //Submit data
-  Future<void> submitData() async {
+  Future<bool> submitData() async {
     DateTime now = DateTime.now();
     DateTime scheduleTime = DateTime(now.year, now.month, now.day,
         _selectedTime.value.hour, _selectedTime.value.minute);
     int alarmId = Random().nextInt(pow(2, 31) as int);
+    List<Alarm>? alarms = await readAlarms();
 //submit the data to the local data base
-    LocalStorage.createAlarm(
+    await LocalStorage.createAlarm(
+      index: alarms!.length,
       alarmId: alarmId,
       alarmDateTime: _selectedTime.value,
       alarmLabel: alarmLabel.text.toString(),
@@ -208,13 +210,14 @@ class AlarmController extends GetxController with StateMixin<List<Alarm>> {
       isSat: _isSat.value,
       isSun: _isSun.value,
     );
-
-//create alarm
-    AlarmService.setAlarm(scheduleTime, alarmId);
+    //create alarm
+    await AlarmService.setAlarm(scheduleTime, alarmId);
+    return true;
   }
 
   Future<void> updateAlarm(int index, int alarmId) async {
     await LocalStorage.updateAlarm(index, alarmId, {
+      "index": index,
       "alarmId": alarmId,
       "alarmDateTime": timeOfDaytoString(_selectedTime.value),
       "alarmLabel": alarmLabel.text.toString(),
@@ -229,6 +232,29 @@ class AlarmController extends GetxController with StateMixin<List<Alarm>> {
       "isSat": _isSat.value,
       "isSun": _isSun.value,
     });
+  }
+
+  Future<void> snoozeAlarm(int index, int alarmId, DateTime dateTime) async {
+    TimeOfDay timeOfDay =
+        TimeOfDay(hour: dateTime.hour, minute: dateTime.minute);
+    await LocalStorage.updateAlarm(index, alarmId, {
+      "index": index,
+      "alarmId": alarmId,
+      "alarmDateTime": timeOfDaytoString(timeOfDay),
+      "alarmLabel": alarmLabel.text.toString(),
+      "isActive": _isActive.value == true ? 1 : 0,
+      "isVibrate": _isVibrate.value == true ? 1 : 0,
+      "isOnce": _isOnce.value,
+      "isMon": _isMon.value,
+      "isTue": _isTue.value,
+      "isWed": _isWed.value,
+      "isThu": _isThu.value,
+      "isFri": _isFri.value,
+      "isSat": _isSat.value,
+      "isSun": _isSun.value,
+    }).whenComplete(
+      () => talker.log("Alarm Snoozed for 2 minutes"),
+    );
   }
 
 //read Alarms from the Local Database

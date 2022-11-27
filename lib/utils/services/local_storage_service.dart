@@ -28,7 +28,8 @@ class LocalStorage {
   //   content.isEmpty ? file.writeAsString("") : null;
   // }
 
-  static void createAlarm({
+  static Future<void> createAlarm({
+    required int index,
     required int alarmId,
     required TimeOfDay alarmDateTime,
     required String alarmLabel,
@@ -49,6 +50,7 @@ class LocalStorage {
     List alarmInfo = content != "" ? jsonDecode(content) : [];
 
     var model = {
+      "index": index,
       "alarmId": alarmId,
       "alarmDateTime": timeOfDaytoString(alarmDateTime),
       "alarmLabel": alarmLabel,

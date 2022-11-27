@@ -1,19 +1,14 @@
 import 'dart:async';
-import 'dart:io';
-
+import 'dart:developer';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
-import 'package:bringtoforeground/bringtoforeground.dart';
-import 'package:clock_app/main.dart';
+import 'package:clock_app/controller/alarm_controller.dart';
 import 'package:clock_app/model/alarm_model.dart';
 import 'package:clock_app/utils/services/local_notification_service.dart';
 import 'package:clock_app/utils/services/local_storage_service.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:flutter_vibrate/flutter_vibrate.dart';
-import 'package:get/get.dart';
-
-import '../../view/screens/alarmdetails_view.dart';
+import '../globals.dart';
 import 'logging_service.dart';
 
 class AlarmService {
@@ -66,10 +61,24 @@ class AlarmService {
     //   ),
     // );
     //call local notification
+
     List<Alarm> alarms = await LocalStorage.readAlarm();
     for (var i = 0; i < alarms.length; i++) {
       if (alarms[i].alarmId == alarmId) {
         talker.log(alarms[i].alarmLabel);
+        Future.delayed(const Duration(seconds: 3), () {
+          log("Alarm resheduled automatically");
+          TimeOfDay timeOfDay = stringToTimeOfDay(alarms[i].alarmDateTime);
+
+          DateTime now = DateTime.now();
+
+          DateTime scheduleTime = DateTime(now.year, now.month, now.day,
+                  timeOfDay.hour, timeOfDay.minute)
+              .add(
+            const Duration(minutes: 2),
+          );
+          AlarmController().snoozeAlarm(alarms[i].index, alarmId, scheduleTime);
+        });
         LocalNotification.showNotification(
           id: alarmId,
           body: alarms[i].alarmDateTime,

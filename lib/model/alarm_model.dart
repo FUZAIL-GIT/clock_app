@@ -12,6 +12,7 @@ String alarmToJson(List<Alarm> data) =>
 
 class Alarm {
   Alarm({
+    required this.index,
     required this.alarmId,
     required this.alarmDateTime,
     required this.alarmLabel,
@@ -27,6 +28,7 @@ class Alarm {
     required this.isSun,
   });
 
+  int index;
   int alarmId;
   String alarmDateTime;
   String alarmLabel;
@@ -42,6 +44,7 @@ class Alarm {
   int isSun;
 
   factory Alarm.fromJson(Map<String, dynamic> json) => Alarm(
+        index: json["index"],
         alarmId: json["alarmId"],
         alarmDateTime: json["alarmDateTime"],
         alarmLabel: json["alarmLabel"],
@@ -58,6 +61,7 @@ class Alarm {
       );
 
   Map<String, dynamic> toJson() => {
+        "index": index,
         "alarmId": alarmId,
         "alarmDateTime": alarmDateTime,
         "alarmLabel": alarmLabel,

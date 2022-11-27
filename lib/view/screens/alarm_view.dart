@@ -80,9 +80,7 @@ class AlarmView extends GetView<AlarmController> {
   Widget alarmList(AlarmController alarmController, List<Alarm>? alarmInfo) {
     return Obx(() {
       var data = alarmController.alarmInfo.length;
-      log(
-        alarmController.alarmInfo.length.toString(),
-      );
+
       return Visibility(
         visible: alarmInfo!.isNotEmpty,
         replacement: Center(
@@ -195,6 +193,7 @@ class AlarmView extends GetView<AlarmController> {
                           index,
                           alarmInfo[index].alarmId,
                           {
+                            "index": alarmInfo[index].index,
                             "alarmId": alarmInfo[index].alarmId,
                             "alarmDateTime": alarmInfo[index].alarmDateTime,
                             "alarmLabel": alarmInfo[index].alarmLabel,

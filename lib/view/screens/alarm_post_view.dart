@@ -19,7 +19,7 @@ class AlarmPostView extends GetView {
       alarmController.setPreviousValues(
         args[0],
         args[1],
-        args [2],
+        args[2],
         args[3],
         args[4],
         args[5],
@@ -58,23 +58,32 @@ class AlarmPostView extends GetView {
               TextButton(
                 onPressed: () async {
                   if (alarmController.formkKey.currentState!.validate()) {
-                    var result = args == null
-                        ? alarmController.submitData()
-                        : alarmController.updateAlarm(
+                    args == null
+                        ? alarmController.submitData().whenComplete(() {
+                            Get.to(
+                              const HomeView(),
+                              transition: Transition.circularReveal,
+                              curve: Curves.bounceOut,
+                              duration: const Duration(seconds: 2),
+                            );
+                            Get.delete<AlarmController>();
+                          })
+                        : alarmController
+                            .updateAlarm(
                             args[11],
                             args[12],
-                          );
-                    // var result = alarmController.submitData();
+                          )
+                            .whenComplete(() {
+                            Get.to(
+                              const HomeView(),
+                              transition: Transition.circularReveal,
+                              curve: Curves.bounceOut,
+                              duration: const Duration(seconds: 2),
+                            );
+                            Get.delete<AlarmController>();
+                          });
+
                     await alarmController.readAlarms();
-                    if (result != null) {
-                      Get.to(
-                        const HomeView(),
-                        transition: Transition.circularReveal,
-                        curve: Curves.bounceOut,
-                        duration: const Duration(seconds: 2),
-                      );
-                      Get.delete<AlarmController>();
-                    }
                   }
                 },
                 child: const Text(
