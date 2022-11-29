@@ -1,7 +1,5 @@
 // ignore_for_file: unused_local_variable, unused_element
 
-import 'dart:developer';
-
 import 'package:clock_app/utils/services/battery_optimization_service.dart';
 import 'package:disable_battery_optimization/disable_battery_optimization.dart';
 import 'package:flutter/material.dart';

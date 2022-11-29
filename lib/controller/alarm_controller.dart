@@ -1,5 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member, unused_element
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 import 'package:clock_app/utils/services/alarm_service.dart';
 import 'package:clock_app/utils/services/battery_optimization_service.dart';
@@ -189,13 +190,32 @@ class AlarmController extends GetxController with StateMixin<List<Alarm>> {
 //Submit data
   Future<bool> submitData() async {
     DateTime now = DateTime.now();
-    DateTime scheduleTime = DateTime(now.year, now.month, now.day,
-        _selectedTime.value.hour, _selectedTime.value.minute);
+    DateTime scheduleTime = DateTime(
+        now.year,
+        now.month,
+        _isMon.value == 1
+            ? DateTime.monday
+            : _isTue.value == 1
+                ? DateTime.tuesday
+                : _isWed.value == 1
+                    ? DateTime.wednesday
+                    : _isThu.value == 1
+                        ? DateTime.thursday
+                        : _isFri.value == 1
+                            ? DateTime.friday
+                            : _isSat.value == 1
+                                ? DateTime.saturday
+                                : _isSun.value == 1
+                                    ? DateTime.sunday
+                                    : now.day,
+        _selectedTime.value.hour,
+        _selectedTime.value.minute);
     int alarmId = Random().nextInt(pow(2, 31) as int);
     List<Alarm>? alarms = await readAlarms();
+
 //submit the data to the local data base
     await LocalStorage.createAlarm(
-      index: alarms!.length,
+      index: alarms != null ? alarms.length : 0,
       alarmId: alarmId,
       alarmDateTime: _selectedTime.value,
       alarmLabel: alarmLabel.text.toString(),
@@ -271,13 +291,16 @@ class AlarmController extends GetxController with StateMixin<List<Alarm>> {
         change(null, status: RxStatus.empty());
         // return null;
       }
-    } catch (e) {
-      change(
-        null,
-        status: RxStatus.error(
-          e.toString(),
-        ),
-      );
+    } on FileSystemException catch (e) {
+      if (e.osError != null) {
+        change(null, status: RxStatus.empty());
+      }
+      // change(
+      //   null,
+      //   status: RxStatus.error(
+      //     e.toString(),
+      //   ),
+      // );
       talker.error(e);
     }
     return null;

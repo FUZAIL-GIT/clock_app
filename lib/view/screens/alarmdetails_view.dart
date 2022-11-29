@@ -1,4 +1,5 @@
 // ignore_for_file: unused_local_variable
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:avatar_glow/avatar_glow.dart';
@@ -6,9 +7,9 @@ import 'package:clock_app/controller/alarm_controller.dart';
 import 'package:clock_app/controller/alarm_fired_controller.dart';
 import 'package:clock_app/model/alarm_model.dart';
 import 'package:clock_app/utils/globals.dart';
+import 'package:clock_app/utils/services/alarm_service.dart';
 import 'package:clock_app/utils/theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:get/get.dart';
@@ -118,7 +119,7 @@ class AlarmDetails extends GetView<AlarmFireController> {
           fit: FlexFit.tight,
           child: button(
             label: "CANCEL",
-            onPress: () {
+            onPress: () async {
               if (alarm!.isOnce == 1) {
                 alarmController.updateStatus(alarm.index, alarm.alarmId, {
                   "index": alarm.index,
@@ -137,8 +138,56 @@ class AlarmDetails extends GetView<AlarmFireController> {
                   "isSun": alarm.isSun
                 }).whenComplete(() async {
                   // await alarmController.readAlarms();
-                  exit(0);
+                  log("app exited");
+                  // exit(0);
                 });
+              } else {
+                DateTime now = DateTime.now();
+                TimeOfDay timeOfDay = stringToTimeOfDay(alarm.alarmDateTime);
+                DateTime scheduleTime = DateTime(now.year, now.month, now.day,
+                    timeOfDay.hour, timeOfDay.minute);
+
+                if (alarm.isMon == 1 && scheduleTime.weekday == 1) {
+                  scheduleTime.add(
+                    const Duration(days: 7),
+                  );
+                }
+                if (alarm.isTue == 1 && scheduleTime.weekday == 2) {
+                  scheduleTime.add(
+                    const Duration(days: 7),
+                  );
+                }
+                if (alarm.isWed == 1 && scheduleTime.weekday == 3) {
+                  scheduleTime.add(
+                    const Duration(days: 7),
+                  );
+                }
+                if (alarm.isThu == 1 && scheduleTime.weekday == 4) {
+                  scheduleTime.add(
+                    const Duration(days: 7),
+                  );
+                }
+                if (alarm.isFri == 1 && scheduleTime.weekday == 5) {
+                  scheduleTime.add(
+                    const Duration(days: 7),
+                  );
+                }
+                if (alarm.isSat == 1 && scheduleTime.weekday == 6) {
+                  scheduleTime.add(
+                    const Duration(days: 7),
+                  );
+                }
+                if (alarm.isSun == 1 && scheduleTime.weekday == 7) {
+                  await AlarmService.deleteAlarm(alarm.alarmId);
+                  await AlarmService.setAlarm(
+                    DateTime(now.year, now.month, now.day, timeOfDay.hour,
+                            timeOfDay.minute)
+                        .add(
+                      const Duration(days: 7),
+                    ),
+                    alarm.alarmId,
+                  );
+                }
               }
             },
           ),

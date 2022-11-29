@@ -15,6 +15,7 @@ class AlarmService {
   //set the alarm in android alarm manager
   static Future<void> setAlarm(DateTime scheduleTime, int alarmId) async {
     DateTime now = DateTime.now();
+    talker.error(scheduleTime.weekday);
     DateTime dateTime = scheduleTime.compareTo(now) < 0
         ? scheduleTime.add(const Duration(days: 1))
         : scheduleTime;
@@ -66,7 +67,7 @@ class AlarmService {
     for (var i = 0; i < alarms.length; i++) {
       if (alarms[i].alarmId == alarmId) {
         talker.log(alarms[i].alarmLabel);
-        Future.delayed(const Duration(seconds: 3), () {
+        Future.delayed(const Duration(seconds: 5), () {
           log("Alarm resheduled automatically");
           TimeOfDay timeOfDay = stringToTimeOfDay(alarms[i].alarmDateTime);
 
