@@ -31,7 +31,7 @@ class AlarmView extends GetView<AlarmController> {
           backgroundColor: Colors.grey.shade900,
           body: controller.obx(
             (state) => Visibility(
-              visible: batteryOptimization.isBatteryOptimizationDisabled,
+              visible: !batteryOptimization.isBatteryOptimizationDisabled,
               replacement: Center(
                 child: ElevatedButton(
                   onPressed: () async {

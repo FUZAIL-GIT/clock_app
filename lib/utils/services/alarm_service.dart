@@ -16,6 +16,7 @@ class AlarmService {
   static Future<void> setAlarm(DateTime scheduleTime, int alarmId) async {
     DateTime now = DateTime.now();
     talker.error(scheduleTime.weekday);
+    // talker.error(DateFormat.ABBR_MONTH_WEEKDAY_DAY.toString());
     DateTime dateTime = scheduleTime.compareTo(now) < 0
         ? scheduleTime.add(const Duration(days: 1))
         : scheduleTime;

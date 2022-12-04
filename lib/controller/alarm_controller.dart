@@ -190,26 +190,8 @@ class AlarmController extends GetxController with StateMixin<List<Alarm>> {
 //Submit data
   Future<bool> submitData() async {
     DateTime now = DateTime.now();
-    DateTime scheduleTime = DateTime(
-        now.year,
-        now.month,
-        _isMon.value == 1
-            ? DateTime.monday
-            : _isTue.value == 1
-                ? DateTime.tuesday
-                : _isWed.value == 1
-                    ? DateTime.wednesday
-                    : _isThu.value == 1
-                        ? DateTime.thursday
-                        : _isFri.value == 1
-                            ? DateTime.friday
-                            : _isSat.value == 1
-                                ? DateTime.saturday
-                                : _isSun.value == 1
-                                    ? DateTime.sunday
-                                    : now.day,
-        _selectedTime.value.hour,
-        _selectedTime.value.minute);
+    DateTime scheduleTime = DateTime(now.year, now.month, now.day,
+        _selectedTime.value.hour, _selectedTime.value.minute);
     int alarmId = Random().nextInt(pow(2, 31) as int);
     List<Alarm>? alarms = await readAlarms();
 
